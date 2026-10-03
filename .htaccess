@@ -1,0 +1,30 @@
+# MarketMoke Apache & cPanel URL Rewriter for Pure PHP API & SPA Routes
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Notice: Do not set RewriteBase / so Apache works seamlessly in subdirectories (e.g., /marketmoke) and domain roots
+
+    # Block direct access to sensitive configuration, sql schemas, and environment files
+    <FilesMatch "^(config\.php|\.env.*|\.gitignore|schema\.sql|ai_automation_schema\.sql|composer\.(json|lock)|package\.json|bun\.lock)$">
+        <IfModule mod_authz_core.c>
+            Require all denied
+        </IfModule>
+        <IfModule !mod_authz_core.c>
+            Order allow,deny
+            Deny from all
+        </IfModule>
+    </FilesMatch>
+
+    # Route API Requests & Frontend SPA Routes to index.php
+    # Public SEO documents must bypass the SPA and retain their standards URLs.
+    RewriteRule ^robots\.txt$ robots.php [L]
+    RewriteRule ^rss\.xml$ rss.php [L]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+    RewriteRule ^sitemap-([1-9][0-9]*)\.xml$ sitemap.php?part=$1 [QSA,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
